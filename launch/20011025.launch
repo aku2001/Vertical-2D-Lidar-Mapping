@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- send table.xml to param server -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find p3at_tutorial)/robots/p3at.xacro" />
+    <arg name="x" default="4.5"/>
+    <arg name="y" default="-5.5"/>
+    <arg name="z" default="0.5"/>
+    <arg name="roll" default="0.0"/>
+    <arg name="pitch" default="0.0"/>
+    <arg name="yaw" default="1.5707"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch" >
+        <!-- To use this world go to https://github.com/Gastd/cic and download the model -->
+        <!-- <arg name="world_name" value="$(find p3at_tutorial)/worlds/cic/cic.world"/> -->
+        <arg name="world_name" value="$(find p3at_tutorial)/worlds/robocup_rescue_path1.world"/>
+
+    </include>
+
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    
+    <node name="spawn_pioneer" pkg="gazebo_ros" type="spawn_model" 
+    args="-urdf -param robot_description -model Pioneerr3at -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find p3at_tutorial)/launch/gazebo.rviz"/>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="0 0 0.5 0 0 0 odom map 10" />
+
+
+
+</launch>
+

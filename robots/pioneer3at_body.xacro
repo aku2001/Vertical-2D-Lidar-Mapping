@@ -1,0 +1,1142 @@
+<?xml version="1.0"?>
+
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<link name="base_link"/>
+
+<!-- Chassis -->
+	<link name="chassis">
+		<inertial>
+			<mass value="20.0"/>
+			<origin xyz="0 0 -0.090"/>
+			<inertia ixx="0.3338" ixy="0.0" ixz="0.0"
+				 iyy="0.4783" iyz="0.0"
+				 izz="0.3338"/>
+		</inertial>
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry name="pioneer_geom">
+				<mesh filename="package://p3at_tutorial/meshes/chassis.dae"/>
+			</geometry>
+			<material name="ChassisRed">
+                <color rgba="0.851 0.0 0.0 1.0"/>
+            </material>
+		</visual>
+		<collision>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+				<geometry>
+					<mesh filename="package://p3at_tutorial/meshes/chassis.dae"/>
+				</geometry>
+		</collision>
+	</link>
+	<gazebo reference="chassis">
+		<material value="Gazebo/Red"/>
+	</gazebo>
+	<joint name="base_chassis_joint" type="fixed">
+		<origin xyz="0.00 0 0.177" rpy="0 0 0"/>
+		<parent link="base_link"/>
+		<child link="chassis"/>
+	</joint>
+
+<!-- Top -->
+	<link name="top_plate">
+		<inertial>
+			<mass value="0.1"/>	
+			<origin xyz="-0.025 0 -0.223"/>
+			<inertia ixx="1.0" ixy="0.0" ixz="0.0"
+				 iyy="1.0" iyz="0.0"
+ 				izz="1.0"/>
+		</inertial>
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry name="pioneer_geom">
+				<mesh filename="package://p3at_tutorial/meshes/top.dae"/>
+			</geometry>
+			<material name="TopBlack">
+					<color rgba="0.038 0.038 0.038 1.0"/>
+			</material>
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0 0 0"/>
+			</geometry>
+		</collision>
+	</link>
+	<gazebo reference="top_plate">
+		<material value="Gazebo/Black"/>
+	</gazebo>
+
+	<joint name="chassis_top_joint" type="fixed">
+		<origin xyz="0.043 0 0.254" rpy="0 0 0"/>
+		<parent link="base_link"/>
+		<child link="top_plate"/>
+	</joint>
+<!-- Front + Back Sonar -->
+	<link name="front_sonar">
+		<inertial>
+			<mass value="0.1"/>	
+			<origin xyz="0 0 0"/>
+			<inertia ixx="1.0" ixy="0.0" ixz="0.0"
+				 iyy="1.0" iyz="0.0" izz="1.0"/>
+		</inertial>
+		<visual name="front_sonar_visual">
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry name="pioneer_geom">
+				<mesh filename="package://p3at_tutorial/meshes/front_sonar.dae"/>
+			</geometry>
+			<material name="SonarYellow">
+				<color rgba="0.715 0.583 0.210 1.0"/>
+			</material>
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0 0 0"/>
+			</geometry>
+		</collision>
+	</link>
+	<gazebo reference="front_sonar">
+		<material value="Gazebo/Yellow"/>
+	</gazebo>
+
+	<joint name="base_front_joint" type="fixed">
+		<origin xyz="0.193 0 0.226" rpy="0 0 0"/>
+		<parent link="base_link"/>
+		<child link="front_sonar"/>
+	</joint>
+
+	<link name="back_sonar">
+		<inertial>
+			<mass value="0.1"/>	
+			<origin xyz="0 0 0"/>
+			<inertia ixx="1.0" ixy="0.0" ixz="0.0"
+				 iyy="1.0" iyz="0.0" izz="1.0"/>
+		</inertial>
+		<visual name="back_sonar_visual">
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry name="pioneer_geom">
+				<mesh filename="package://p3at_tutorial/meshes/back_sonar.dae"/>
+			</geometry>
+			<material name="SonarYellow">
+				<color rgba="0.715 0.583 0.210 1.0"/>
+			</material>
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0 0 0"/>
+			</geometry>
+		</collision>
+	</link>
+	<gazebo reference="back_sonar">
+		<material value="Gazebo/Yellow"/>
+	</gazebo>
+
+	<joint name="base_back_joint" type="fixed">
+		<origin xyz="-0.193 0 0.226" rpy="0 0 0"/>
+		<parent link="base_link"/>
+		<child link="back_sonar"/>
+	</joint>
+
+<!-- Front Axles + Wheels + Hubcaps -->
+<xacro:macro name="p3at_front" params="suffix reflect">
+	<link name="p3at_front_${suffix}_axle">
+		<inertial>
+			<mass value="0.1"/>	
+			<origin xyz="0 0 0"/>
+			<inertia ixx="1.0" ixy="0.0" ixz="0.0"
+				 iyy="1.0" iyz="0.0" izz="1.0"/>
+  	 	</inertial>
+	<visual>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry name="pioneer_geom">
+			<mesh filename="package://p3at_tutorial/meshes/axle.dae"/>
+		</geometry>
+		<material name="AxleGrey">
+			<color rgba="0.5 0.5 0.5 1"/>
+		</material>
+	</visual>
+	<collision>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry>
+			<box size="0 0 0"/>
+		</geometry>
+	</collision>
+	</link>
+	<gazebo reference="p3at_front_${suffix}_axle">
+		<material value="Gazebo/Grey"/>
+	</gazebo>
+
+	<joint name="base_front_${suffix}_axle_joint" type="fixed">
+		<origin xyz="0.135 ${reflect*0.156} 0.111" rpy="0 0 0"/>
+		<parent link="base_link"/>
+		<child link="p3at_front_${suffix}_axle"/>
+	</joint>
+
+	<link name="p3at_front_${suffix}_hub">
+		<inertial>
+			<mass value="0.1"/>	
+			<origin xyz="0 0 0"/>
+			<inertia ixx="1.0" ixy="0.0" ixz="0.0"
+				 iyy="1.0" iyz="0.0" izz="1.0"/>
+  	 	</inertial>
+	<visual>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry name="pioneer_geom">
+			<mesh filename="package://p3at_tutorial/meshes/${suffix}_hubcap.dae"/>
+		</geometry>
+		<material name="HubcapYellow">
+			<color rgba="1.0 0.811 0.151 1.0"/>
+		</material>
+	</visual>
+	<collision>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry>
+			<box size="0 0 0"/>
+		</geometry>
+	</collision>
+	</link>
+	<gazebo reference="p3at_front_${suffix}_hub">
+		<material value="Gazebo/Yellow"/>
+	</gazebo>
+
+	<joint name="base_front_${suffix}_hub_joint" type="fixed">
+		<origin xyz="0 ${reflect*0.041} 0" rpy="0 0 0"/>
+		<parent link="p3at_front_${suffix}_axle"/>
+		<child link="p3at_front_${suffix}_hub"/>
+	</joint>
+
+	<link name="p3at_front_${suffix}_wheel">
+		<inertial>
+			<mass value="0.5"/>	
+			<origin xyz="0 0 0"/>
+			<inertia ixx="0.012411765597" ixy="0" ixz="0"
+         iyy="0.015218160428" iyz="0" izz="0.011763977943"/>
+      </inertial>
+	<visual>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry name="pioneer_geom">
+			<mesh filename="package://p3at_tutorial/meshes/wheel.dae"/>
+		</geometry>
+		<material name="WheelBlack">
+			<color rgba="0.117 0.117 0.117 1"/>
+		</material>
+	</visual>
+	<collision>
+		<origin xyz="0 0 0" rpy="${-3.1415927/2} 0 0"/>
+		<geometry>
+	    <!--mesh filename="package://p3at_tutorial/meshes/wheel.dae"/-->
+	    <cylinder radius="0.110" length="0.035"/>
+		</geometry>
+	</collision>
+	</link>
+	<gazebo reference="p3at_front_${suffix}_wheel">
+		<material value="Gazebo/Black"/>
+	</gazebo>
+
+	<joint name="p3at_front_${suffix}_wheel_joint" type="continuous">
+  	<axis xyz="0 1 0"/>
+    <anchor xyz="0 0 0"/>
+    <limit effort="100" velocity="100" />
+    <joint_properties damping="0.7"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<parent link="p3at_front_${suffix}_hub"/>
+		<child link="p3at_front_${suffix}_wheel"/>
+	</joint>
+</xacro:macro>
+<!-- Back Axles + Wheels + Hubcaps -->
+<xacro:macro name="p3at_back" params="suffix reflect">
+	<link name="p3at_back_${suffix}_axle">
+		<inertial>
+			<mass value="0.1"/>	
+			<origin xyz="0 0 0"/>
+			<inertia ixx="1.0" ixy="0.0" ixz="0.0"
+				 iyy="1.0" iyz="0.0" izz="1.0"/>
+  	 	</inertial>
+	<visual>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry name="pioneer_geom">
+			<mesh filename="package://p3at_tutorial/meshes/axle.dae"/>
+		</geometry>
+		<material name="AxleGrey">
+			<color rgba="0.5 0.5 0.5 1"/>
+		</material>
+	</visual>
+	<collision>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry>
+			<mesh filename="package://p3at_tutorial/meshes/axle.dae"/>
+		</geometry>
+	</collision>
+	</link>
+	<gazebo reference="p3at_back_${suffix}_axle">
+		<material value="Gazebo/Grey"/>
+	</gazebo>
+
+	<joint name="bp3at_back_${suffix}_axle_joint" type="fixed">
+		<origin xyz="-0.134 ${reflect*0.156} 0.111" rpy="0 0 0"/>
+		<parent link="base_link"/>
+		<child link="p3at_back_${suffix}_axle"/>
+	</joint>
+
+
+	<link name="p3at_back_${suffix}_hub">
+		<inertial>
+			<mass value="0.1"/>	
+			<origin xyz="0 0 0"/>
+			<inertia ixx="1.0" ixy="0.0" ixz="0.0"
+				 iyy="1.0" iyz="0.0" izz="1.0"/>
+  	 	</inertial>
+	<visual>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry name="pioneer_geom">
+			<mesh filename="package://p3at_tutorial/meshes/${suffix}_hubcap.dae"/>
+		</geometry>
+		<material name="HubcapYellow"/>
+	</visual>
+	<collision>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry>
+			<mesh filename="package://p3at_tutorial/meshes/${suffix}_hubcap.dae"/>
+		</geometry>
+	</collision>
+	</link>
+	<gazebo reference="p3at_back_${suffix}_hub">
+		<material value="Gazebo/Yellow"/>
+	</gazebo>
+
+	<joint name="p3at_back_${suffix}_hub_joint" type="fixed">
+		<origin xyz="-0 ${reflect*0.041} 0" rpy="0 0 0"/>
+		<parent link="p3at_back_${suffix}_axle"/>
+		<child link="p3at_back_${suffix}_hub"/>
+	</joint>
+
+	<link name="p3at_back_${suffix}_wheel">
+		<inertial>
+			<mass value="0.5"/>	
+			<origin xyz="0 0 0"/>
+			<inertia ixx="0.012411765597" ixy="0" ixz="0"
+         iyy="0.015218160428" iyz="0" izz="0.011763977943"/>
+      </inertial>
+	<visual>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry name="pioneer_geom">
+			<mesh filename="package://p3at_tutorial/meshes/wheel.dae"/>
+		</geometry>
+		<material name="WheelBlack"/>
+	</visual>
+	<collision>
+		<origin xyz="0 0 0" rpy="${-3.1415927/2} 0 0"/>
+		<geometry>
+	    <!--mesh filename="package://p3at_tutorial/meshes/wheel.dae"/-->
+	    <cylinder radius="0.110" length="0.035"/>
+		</geometry>
+	</collision>
+	</link>
+	<gazebo reference="p3at_back_${suffix}_wheel">
+		<material value="Gazebo/Black"/>
+	</gazebo>
+
+	<joint name="p3at_back_${suffix}_wheel_joint" type="continuous">
+	  <axis xyz="0 1 0"/>
+    <anchor xyz="0 0 0"/>
+    <limit effort="100" velocity="100" />
+    <joint_properties damping="0.7"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<parent link="p3at_back_${suffix}_hub"/>
+		<child link="p3at_back_${suffix}_wheel"/>
+	</joint>
+	
+  <gazebo reference="p3at_back_${suffix}_wheel">
+    <kp>1000000.0</kp> <!-- kp and kd for rubber -->
+    <kd>100.0</kd>
+    <mu1>10.0</mu1>
+    <mu2>1.0</mu2>
+    <fdir1>1 0 0</fdir1> <!-- is this correct? -->
+    <maxVel>1.0</maxVel>
+    <minDepth>0.00</minDepth>
+  </gazebo>
+  
+  <gazebo reference="p3at_front_${suffix}_wheel">
+    <kp>1000000.0</kp> <!-- kp and kd for rubber -->
+    <kd>100.0</kd>
+    <mu1>10.0</mu1>
+    <mu2>1.0</mu2>
+    <fdir1>1 0 0</fdir1> <!-- is this correct? -->
+    <maxVel>1.0</maxVel>
+    <minDepth>0.00</minDepth>
+  </gazebo>
+
+</xacro:macro>
+
+
+<xacro:macro name="p3at_gazebo_ext">
+
+<gazebo>
+    <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+      <robotNamespace></robotNamespace>
+      <jointName>p3at_front_left_wheel_joint, p3at_front_right_wheel_joint, p3at_back_left_wheel_joint, p3at_back_right_wheel_joint</jointName>
+      <updateRate>10.0</updateRate>
+      <alwaysOn>true</alwaysOn>
+    </plugin>
+</gazebo>
+
+<gazebo>
+  <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
+    <updateRate>50.0</updateRate>
+    <!-- <robotNamespace>/</robotNamespace> -->
+    <leftFrontJoint>p3at_front_left_wheel_joint</leftFrontJoint>
+    <rightFrontJoint>p3at_front_right_wheel_joint</rightFrontJoint>
+    <leftRearJoint>p3at_back_left_wheel_joint</leftRearJoint>
+    <rightRearJoint>p3at_back_right_wheel_joint</rightRearJoint>
+    <odometryTopic>pose</odometryTopic>
+    <wheelSeparation>0.4</wheelSeparation>
+    <wheelDiameter>0.220</wheelDiameter>
+    <covariance_x>0.0000</covariance_x>
+    <covariance_y>0.0000</covariance_y>
+    <covariance_yaw>0.0000</covariance_yaw>
+    <robotBaseFrame>base_link</robotBaseFrame>
+    <commandTopic>cmd_vel</commandTopic>
+    <odometryFrame>odom</odometryFrame>
+    <broadcastTF>1</broadcastTF>
+    <wheel_accel>1.8</wheel_accel>
+    <torque>5</torque>
+    <topicName>cmd_vel</topicName>
+    <alpha1>0.000</alpha1>
+    <alpha2>0.00000</alpha2>
+    <alpha3>0.00000</alpha3>
+    <alpha4>0.000</alpha4>
+  </plugin>
+</gazebo>
+
+
+<!-- QTY ADDITIONS 4 Camera, 2-3D Lidar -->
+  
+<!-- RGB CAMERA FRONT -->
+
+  <!-- RGB CAMERA FRONT-->
+
+   <joint name="camera_joint_front" type="fixed">
+    <axis xyz="0 1 0" />
+    <origin xyz="0.150 0 0.1" rpy="0 0 0"/>
+    <parent link="top_plate"/>
+    <child link="camera_link_front"/>
+  </joint>
+
+  <link name="camera_link_front">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+  <gazebo reference="camera_link_front">
+    <sensor type="camera" name="camera_front">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller_front" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>rrbot/camera_front</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_link_front</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  	<!-- RGB CAMERA FRONT END -->
+
+
+  	<!-- RGB CAMERA FRONT BOTTOM START -->
+
+   <joint name="camera_joint_front_bottom" type="fixed">
+    <axis xyz="0 1 0" />
+    <origin xyz=" 0.2 0 -0.1" rpy="0 1.5 0"/>
+    <parent link="top_plate"/>
+    <child link="camera_link_front_bottom"/>
+  </joint>
+
+  <link name="camera_link_front_bottom">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+  <gazebo reference="camera_link_front_bottom">
+    <sensor type="camera" name="camera_front_bottom">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller_front_bottom" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>rrbot/camera_front_bottom</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_link_front_bottom</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+	<!-- RGB CAMERA FRONT BOTTOM END -->
+
+
+<!-- RGB CAMERA BACK -->
+
+  <!-- RGB CAMERA BACK FRONT-->
+
+   <joint name="camera_joint_back" type="fixed">
+    <axis xyz="0 1 0" />
+    <origin xyz="-0.2 0 0.1" rpy="0 0 3.1415"/>
+    <parent link="top_plate"/>
+    <child link="camera_link_back"/>
+  </joint>
+
+  <link name="camera_link_back">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+  <gazebo reference="camera_link_back">
+    <sensor type="camera" name="camera_back">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller_back" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>rrbot/camera_back</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_link_back</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- RGB CAMERA FRONT END -->
+
+
+  <!-- RGB CAMERA BOTTOM BACK START -->
+
+   <joint name="camera_joint_back_bottom" type="fixed">
+    <axis xyz="0 0 0" />
+    <origin xyz=" -0.4 0 -0.1" rpy=" 0 0.5 0 "/>
+    <parent link="top_plate"/>
+    <child link="camera_link_back_bottom"/>
+  </joint>
+
+  <link name="camera_link_back_bottom">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+  <gazebo reference="camera_link_back_bottom">
+    <sensor type="camera" name="camera_back_bottom">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller_back_bottom" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>rrbot/camera_back_bottom</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_link_back_bottom</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+<!-- RGB CAMERA FRONT BOTTOM END -->
+
+
+
+<!-- Hokuyo Lasers 4 -> Front, Back, Left, Right -->
+
+<!-- Hokuyo Laser Front -->
+  <joint name="hokuyo_joint_front" type="fixed">
+    <axis xyz="0 1 0" />
+    <origin xyz="0.2 0 0.1" rpy="0 0.5235 0"/>
+    <parent link="top_plate"/>
+    <child link="hokuyo_link_front"/>
+  </joint>
+
+  <link name="hokuyo_link_front">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/> 
+      <geometry>
+        <mesh filename="package://p3at_tutorial/meshes/hokuyo1.dae"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+<gazebo reference="hokuyo_link_front">
+    <sensor type="ray" name="head_hokuyo_sensor_front">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>60</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.5235</min_angle>
+            <max_angle>0.5235</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller_front" filename="libgazebo_ros_laser.so">
+        <topicName>/scan_front</topicName>
+        <frameName>hokuyo_link_front</frameName>
+      </plugin>
+    </sensor>
+</gazebo>
+
+<!-- Hokuyo Laser Back-->
+  <joint name="hokuyo_joint_back" type="fixed">
+    <axis xyz="0 1 0" />
+    <origin xyz="-0.3 0 0.1" rpy="0 0.5235 3.1415"/>
+    <parent link="top_plate"/>
+    <child link="hokuyo_link_back"/>
+  </joint>
+
+  <link name="hokuyo_link_back">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/> 
+      <geometry>
+        <mesh filename="package://p3at_tutorial/meshes/hokuyo1.dae"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+<gazebo reference="hokuyo_link_back">
+    <sensor type="ray" name="head_hokuyo_sensor_back">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>60</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.5235</min_angle>
+            <max_angle>0.5235</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller_back" filename="libgazebo_ros_laser.so">
+        <topicName>/scan_back</topicName>
+        <frameName>hokuyo_link_back</frameName>
+      </plugin>
+    </sensor>
+</gazebo>
+
+<!-- Hokuyo Laser Left -->
+  <joint name="hokuyo_joint_left" type="fixed">
+    <axis xyz="-0.5 1 0" />
+    <origin xyz="0 0.2 0.1" rpy="0 0.5235 1.5707"/>
+    <parent link="top_plate"/>
+    <child link="hokuyo_link_left"/>
+  </joint>
+
+  <link name="hokuyo_link_left">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/> 
+      <geometry>
+        <mesh filename="package://p3at_tutorial/meshes/hokuyo1.dae"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+<gazebo reference="hokuyo_link_left">
+    <sensor type="ray" name="head_hokuyo_sensor_left">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>60</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.5235</min_angle>
+            <max_angle>0.5235</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller_left" filename="libgazebo_ros_laser.so">
+        <topicName>/scan_left</topicName>
+        <frameName>hokuyo_link_left</frameName>
+      </plugin>
+    </sensor>
+</gazebo>
+
+<!-- Hokuyo Laser Right-->
+  <joint name="hokuyo_joint_right" type="fixed">
+    <axis xyz="-0.5 1 0" />
+    <origin xyz="0 -0.2 0.1" rpy="0 0.5235 -1.5707"/>
+    <parent link="top_plate"/>
+    <child link="hokuyo_link_right"/>
+  </joint>
+
+  <link name="hokuyo_link_right">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/> 
+      <geometry>
+        <mesh filename="package://p3at_tutorial/meshes/hokuyo1.dae"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+<gazebo reference="hokuyo_link_right">
+    <sensor type="ray" name="head_hokuyo_sensor_right">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>60</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.5235</min_angle>
+            <max_angle>0.5235</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller_right" filename="libgazebo_ros_laser.so">
+        <topicName>/scan_right</topicName>
+        <frameName>hokuyo_link_right</frameName>
+      </plugin>
+    </sensor>
+</gazebo>
+
+
+
+
+
+
+  <!-- Hokuyo Laser For Mapping-->
+  <joint name="hokuyo_joint" type="fixed">
+    <axis xyz="0 1 0" />
+    <origin xyz="0.3 0 0.2" rpy="0 1.5707 0"/>
+    <parent link="top_plate"/>
+    <child link="hokuyo_link"/>
+  </joint>
+
+  <link name="hokuyo_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/> 
+      <geometry>
+        <mesh filename="package://p3at_tutorial/meshes/hokuyo1.dae"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+<gazebo reference="hokuyo_link">
+    <sensor type="ray" name="head_hokuyo_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>120</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.04719</min_angle>
+            <max_angle>1.04719</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
+        <topicName>/scan</topicName>
+        <frameName>hokuyo_link</frameName>
+      </plugin>
+    </sensor>
+</gazebo>
+
+<gazebo reference="front_sonar">
+    <sensor type="ray" name="front_sonar_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>25</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>8</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.570796</min_angle>
+            <max_angle>1.570796</max_angle>
+<!--             <samples>16</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.919862</min_angle>
+            <max_angle>1.919862</max_angle> -->
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>5.0</max>
+          <resolution>0.1</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.1</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_front_sonar_controller" filename="libgazebo_ros_laser.so">
+        <topicName>/front_sonar_raw</topicName>
+        <frameName>front_sonar</frameName>
+      </plugin>
+    </sensor>
+</gazebo>
+
+<gazebo reference="back_sonar_fake">
+    <sensor type="ray" name="back_sonar_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>25</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>8</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.570796</min_angle>
+            <max_angle>1.570796</max_angle>
+<!--             <samples>16</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.919862</min_angle>
+            <max_angle>1.919862</max_angle> -->
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>5.0</max>
+          <resolution>0.1</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.1</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_back_sonar_controller" filename="libgazebo_ros_laser.so">
+        <topicName>/back_sonar_raw</topicName>
+        <frameName>back_sonar_fake</frameName>
+      </plugin>
+    </sensor>
+</gazebo>
+
+<gazebo>
+    <plugin name="imu_controller" filename="libhector_gazebo_ros_imu.so">
+        <robotNamespace>/</robotNamespace>
+        <updateRate>50.0</updateRate>
+        <bodyName>imu</bodyName>
+        <topicName>imu/data_raw</topicName>
+        <accelDrift>0.05 0.05 0.05</accelDrift>
+        <accelGaussianNoise>0.05 0.05 0.05</accelGaussianNoise>
+        <rateDrift>0.05 0.05 0.05 </rateDrift>
+        <rateGaussianNoise>0.05 0.05 0.05 </rateGaussianNoise>
+        <headingDrift>0.05</headingDrift>
+        <headingGaussianNoise>0.05</headingGaussianNoise>
+    </plugin>
+</gazebo>
+</xacro:macro>
+
+</robot>
